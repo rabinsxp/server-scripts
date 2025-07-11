@@ -1,41 +1,44 @@
 #sudo virt-install --name AlmaLinux-server --ram=2048 --vcpus=2 --cpu host --hvm --
 #disk path=/var/lib/libvirt/images/almalinuxservervml,size=20 --cdrom /var/lib/libvirt/boot/AlmaLinux-8.4-x86_64-DVD.iso --graphics vnc
 
-
 #!/bin/bash
 
-# AlmaLinux 8.4 VM Setup via ISO and VNC
+# AlmaLinux 9.4 VM Setup via ISO and VNC
 # Author: Rabins Sharma Lamichhane
-# Tested on AlmaLinux 9
+# Version: 2025-07-11
 
 set -e
 
 # === Settings ===
-VM_NAME="AlmaLinux-server"
-ISO_URL="https://repo.almalinux.org/almalinux/8.4/isos/x86_64/AlmaLinux-8.4-x86_64-dvd.iso"
-ISO_FILE="/var/lib/libvirt/boot/AlmaLinux-8.4-x86_64-dvd.iso"
-DISK_FILE="/var/lib/libvirt/images/almalinuxservervm1.qcow2"
+VM_NAME="AlmaLinux9-server"
+ISO_URL="https://repo.almalinux.org/almalinux/9.4/isos/x86_64/AlmaLinux-9.4-x86_64-dvd.iso"
+ISO_FILE="/var/lib/libvirt/boot/AlmaLinux-9.4-x86_64-dvd.iso"
+DISK_FILE="/var/lib/libvirt/images/almalinux9-server.qcow2"
 DISK_SIZE="20G"
 RAM="2048"
 VCPUS="2"
-BRIDGE="br0"  # change to 'virbr0' if you're not using a custom bridge
+BRIDGE="br0"  # Or use 'virbr0' if you are using NAT
 
-echo "=== Creating directories if not exist ==="
+# === Step 1: Prepare directories ===
+echo "📁 Creating image/ISO directories..."
 sudo mkdir -p /var/lib/libvirt/boot
 sudo mkdir -p /var/lib/libvirt/images
 
-echo "=== Downloading AlmaLinux 8.4 ISO if not present ==="
+# === Step 2: Download ISO if needed ===
 if [ ! -f "$ISO_FILE" ]; then
-  echo "Downloading ISO..."
+  echo "⬇️ Downloading AlmaLinux 9.4 ISO..."
   sudo wget -O "$ISO_FILE" "$ISO_URL"
 else
-  echo "ISO already exists."
+  echo "✅ ISO already exists: $ISO_FILE"
 fi
 
-echo "=== Creating disk image ==="
+# === Step 3: Create QCOW2 disk ===
+echo "💾 Creating virtual disk..."
 sudo qemu-img create -f qcow2 "$DISK_FILE" "$DISK_SIZE"
 
-echo "=== Starting virt-install ==="
+# === Step 4: Install VM with virt-install ===
+echo "🚀 Launching virt-install to boot the installer..."
+
 sudo virt-install \
   --name "$VM_NAME" \
   --ram "$RAM" \
@@ -44,11 +47,13 @@ sudo virt-install \
   --hvm \
   --disk path="$DISK_FILE",format=qcow2,bus=virtio \
   --cdrom "$ISO_FILE" \
-  --os-variant almalinux8.4 \
+  --os-variant almalinux9 \
   --network bridge="$BRIDGE",model=virtio \
   --graphics vnc \
   --noautoconsole
 
-echo "✅ VM '$VM_NAME' created and booted to installer!"
-echo "🔍 To view VNC port: virsh vncdisplay $VM_NAME"
-echo "📡 Use a VNC client to connect (e.g., localhost:5900 or as shown above)"
+# === Step 5: Done ===
+echo "✅ VM '$VM_NAME' created and is now running."
+echo "🔍 Run: virsh vncdisplay $VM_NAME  → to get the VNC port."
+echo "🖥️ Use a VNC viewer to connect to localhost:<port>"
+
