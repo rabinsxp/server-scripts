@@ -1,5 +1,6 @@
-cat /etc/sysconfig/network-scripts/ifcfg-br0
+sudo nano /etc/sysconfig/network-scripts/ifcfg-eth0
 
-cp /etc/sysconfig/network-scripts/ifcfg-br0to /etc/sysconfig/network-scripts/ifcfg-br0.bak
+#Add the file 
+cp ifcfg-eth0 /etc/sysconfig/network-scripts/
 
-cp ifcfg-br0 to /etc/sysconfig/network-scripts/ifcfg-br0
+
