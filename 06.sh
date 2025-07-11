@@ -3,42 +3,38 @@
 
 #!/bin/bash
 
-# AlmaLinux 9.4 VM Setup via ISO and VNC
-# Author: Rabins Sharma Lamichhane
-# Version: 2025-07-11
+# AlmaLinux 9 VM Setup via ISO and VNC
+# Date: 11/07/2025
 
 set -e
 
 # === Settings ===
 VM_NAME="AlmaLinux9-server"
-ISO_URL="https://repo.almalinux.org/almalinux/9.4/isos/x86_64/AlmaLinux-9.4-x86_64-dvd.iso"
-ISO_FILE="/var/lib/libvirt/boot/AlmaLinux-9.4-x86_64-dvd.iso"
-DISK_FILE="/var/lib/libvirt/images/almalinux9-server.qcow2"
+ISO_URL="https://repo.almalinux.org/almalinux/9/isos/x86_64/AlmaLinux-9-latest-x86_64-dvd.iso"
+ISO_FILE="/var/lib/libvirt/boot/AlmaLinux-9-latest-x86_64-dvd.iso"
+DISK_FILE="/var/lib/libvirt/images/${VM_NAME}.qcow2"
 DISK_SIZE="20G"
 RAM="2048"
 VCPUS="2"
-BRIDGE="br0"  # Or use 'virbr0' if you are using NAT
+BRIDGE="br0"       # or 'virbr0' if you're using NAT networking
 
-# === Step 1: Prepare directories ===
-echo "📁 Creating image/ISO directories..."
-sudo mkdir -p /var/lib/libvirt/boot
-sudo mkdir -p /var/lib/libvirt/images
+# 1. Prepare directories
+sudo mkdir -p /var/lib/libvirt/boot /var/lib/libvirt/images
 
-# === Step 2: Download ISO if needed ===
+# 2. Download ISO if needed
 if [ ! -f "$ISO_FILE" ]; then
-  echo "⬇️ Downloading AlmaLinux 9.4 ISO..."
+  echo "⬇️ Downloading AlmaLinux 9 ISO..."
   sudo wget -O "$ISO_FILE" "$ISO_URL"
 else
-  echo "✅ ISO already exists: $ISO_FILE"
+  echo "✅ ISO already present: $ISO_FILE"
 fi
 
-# === Step 3: Create QCOW2 disk ===
+# 3. Create QCOW2 disk
 echo "💾 Creating virtual disk..."
 sudo qemu-img create -f qcow2 "$DISK_FILE" "$DISK_SIZE"
 
-# === Step 4: Install VM with virt-install ===
-echo "🚀 Launching virt-install to boot the installer..."
-
+# 4. Launch virt-install
+echo "🚀 Booting installer via virt-install..."
 sudo virt-install \
   --name "$VM_NAME" \
   --ram "$RAM" \
@@ -52,8 +48,9 @@ sudo virt-install \
   --graphics vnc \
   --noautoconsole
 
-# === Step 5: Done ===
-echo "✅ VM '$VM_NAME' created and is now running."
-echo "🔍 Run: virsh vncdisplay $VM_NAME  → to get the VNC port."
-echo "🖥️ Use a VNC viewer to connect to localhost:<port>"
+# 5. Done
+echo "✅ VM '$VM_NAME' created and installer running."
+echo "🔍 VNC port: virsh vncdisplay $VM_NAME"
+echo "🖥️ Connect via VNC at localhost:<port>"
+
 
